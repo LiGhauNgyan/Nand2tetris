@@ -39,5 +39,48 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
+	Not(in=instruction[15], out=ainstruct);
+    Not(in=ainstruct, out=cinstruct);
+
+    //A Register
+    And(a=cinstruct, b=instruction[5], out=computea);
+    Mux16(a=instruction, b=ALUout, sel=instruction[15] ,out=newa);
+    Or(a=ainstruct, b=computea, out=loada);
+    ARegister(in=newa, load=loada, out=ARegout);
+
+    //D Register
+    And(a=instruction[4], b=cinstruct, out=loadd);
+    DRegister(in=ALUout, load=loadd, out=DRegout);
+
+    //ALU
+    Mux16(a=ARegout, b=inM, sel=instruction[12], out=aorm);
+    ALU(x=DRegout, y=aorm, zx=instruction[11], nx=instruction[10],
+    zy=instruction[9], ny=instruction[8], f=instruction[7],
+    no=instruction[6], out=ALUout, zr=zr, ng=ng );
+
+    //jump logic
+    Not(in=zr, out=nzr);
+    Not(in=ng, out=nng);
+    And(a=nzr, b=nng, out=pos);
+    And(a=instruction[2], b=ng, out=jlt);
+    And(a=instruction[1], b=zr, out=jz);
+    And(a=instruction[0], b=pos, out=jpos);
+    Or(a=jlt, b=jz, out=jltz);
+    Or(a=jltz, b=jpos, out=jumpcondition);
+    And(a=cinstruct, b=jumpcondition, out=shouldjump);
+
+    //outputs
+
+    //writeM
+    And(a=cinstruct, b=instruction[3], out=writeM);
+
+    //addressM
+    And16(a=ARegout, b=true, out[0..14]=addressM);
+
+    //outM
+    And16(a=ALUout, b=true, out=outM);
+
+    //PC
+    PC(in=ARegout , load=shouldjump, inc=true, reset=reset, out[0..14]=pc);
     // Put your code here:
 }

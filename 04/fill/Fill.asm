@@ -1,6 +1,6 @@
 // This file is part of www.nand2tetris.org
 // and the book "The Elements of Computing Systems"
-// by Nisan and Schocken, MIT Press.
+// by Nisan and Schocken,  Press.
 // File name: projects/04/Fill.asm
 
 // Runs an infinite loop that listens to the keyboard input.
@@ -12,3 +12,47 @@
 // the screen should remain fully clear as long as no key is pressed.
 
 // Put your code here.
+(LOOP)
+@KBD
+D=M
+@CLEAR
+D;JEQ
+
+@SCREEN
+D=A
+@address
+M=D
+(FILL)
+@address
+A=M
+M=-1
+@address
+M=M+1
+@KBD
+D=A
+@address
+D=D-M
+@FILL
+D;JGT
+@LOOP
+0;JMP
+
+(CLEAR)
+@SCREEN
+D=A
+@address
+M=D
+(CLEARX)
+@address
+A=M
+M=0
+@address
+M=M+1
+@KBD
+D=A
+@address
+D=D-M
+@CLEARX
+D;JGT
+@LOOP
+0;JMP
